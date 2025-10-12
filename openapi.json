@@ -1,0 +1,1348 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Comps API",
+    "description": "API for creating and managing image comparisons",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/v1/login": {
+      "post": {
+        "tags": [
+          "api"
+        ],
+        "summary": "Api Login",
+        "description": "Authenticate and get an access token for API usage.\n- **username**: Your username\n- **password**: Your invitation code",
+        "operationId": "api_login_api_v1_login_post",
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_api_login_api_v1_login_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/comparisons": {
+      "get": {
+        "tags": [
+          "api"
+        ],
+        "summary": "List Comparisons",
+        "description": "List all available comparisons.\n\nReturns a list of all comparisons with their basic metadata including:\n- ID, name, and show name\n- Tags\n- Grid dimensions (rows and columns)\n- Expiration settings\n- Creation and last accessed timestamps",
+        "operationId": "list_comparisons_api_v1_comparisons_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ComparisonResponse"
+                  },
+                  "type": "array",
+                  "title": "Response List Comparisons Api V1 Comparisons Get"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "api"
+        ],
+        "summary": "Create New Comparison",
+        "description": "Create a new comparison.\n\nCreates a new comparison with the specified parameters:\n- Name and show name (optional)\n- Tags for categorization (optional)\n- Grid dimensions (rows and columns, max 20 rows)\n- Expiration settings",
+        "operationId": "create_new_comparison_api_v1_comparisons_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ComparisonCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComparisonResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/comparisons/{comparison_id}": {
+      "get": {
+        "tags": [
+          "api"
+        ],
+        "summary": "Get Comparison Detail",
+        "description": "Get detailed information about a specific comparison.\n\nReturns comprehensive information about the comparison including:\n- Basic metadata (ID, name, show name, tags)\n- Grid dimensions (rows and columns)\n- Expiration settings\n- Creation and last accessed timestamps\n- Complete list of images with their positions and metadata\n\nThis endpoint also updates the last_accessed timestamp for the comparison.",
+        "operationId": "get_comparison_detail_api_v1_comparisons__comparison_id__get",
+        "parameters": [
+          {
+            "name": "comparison_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Comparison Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComparisonDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/comparisons/{comparison_id}/images/{filename}": {
+      "put": {
+        "tags": [
+          "api"
+        ],
+        "summary": "Update Image Metadata",
+        "description": "Update image metadata.\n\nCurrently supports updating:\n- Custom name for the image\n\nThe custom name can be used to provide a more descriptive label for the image\nthat will be displayed in the UI.",
+        "operationId": "update_image_metadata_api_v1_comparisons__comparison_id__images__filename__put",
+        "parameters": [
+          {
+            "name": "comparison_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Comparison Id"
+            }
+          },
+          {
+            "name": "filename",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Filename"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomNameUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/delete-comparison/{comparison_id}": {
+      "delete": {
+        "tags": [
+          "api"
+        ],
+        "summary": "Delete User Comparison",
+        "description": "Delete a comparison owned by the current user",
+        "operationId": "delete_user_comparison_api_v1_delete_comparison__comparison_id__delete",
+        "parameters": [
+          {
+            "name": "comparison_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Comparison Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/comparison": {
+      "post": {
+        "tags": [
+          "api"
+        ],
+        "summary": "Api Create Comparison",
+        "description": "Creates a new comparison record and returns its ID.\nThis endpoint does not accept files.",
+        "operationId": "api_create_comparison_api_v1_comparison_post",
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_api_create_comparison_api_v1_comparison_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/comparison/{comparison_id}/image": {
+      "post": {
+        "tags": [
+          "api"
+        ],
+        "summary": "Api Upload Image",
+        "description": "Uploads a single image to an existing comparison.",
+        "operationId": "api_upload_image_api_v1_comparison__comparison_id__image_post",
+        "parameters": [
+          {
+            "name": "comparison_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Comparison Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_api_upload_image_api_v1_comparison__comparison_id__image_post"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "summary": "Health Check",
+        "description": "Health check endpoint for monitoring",
+        "operationId": "health_check_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/login": {
+      "get": {
+        "summary": "Login Page",
+        "description": "Render the login page",
+        "operationId": "login_page_login_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Login",
+        "description": "Handle login form submission",
+        "operationId": "login_login_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/logout": {
+      "get": {
+        "summary": "Logout",
+        "description": "Log out the current user",
+        "operationId": "logout_logout_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/metrics": {
+      "get": {
+        "summary": "Admin Metrics Page",
+        "operationId": "admin_metrics_page_admin_metrics_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin": {
+      "get": {
+        "summary": "Admin Page",
+        "description": "Admin page for managing invitation codes",
+        "operationId": "admin_page_admin_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/create-invitation": {
+      "post": {
+        "summary": "Create Invitation",
+        "description": "Create a new invitation code",
+        "operationId": "create_invitation_admin_create_invitation_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/user/set-admin": {
+      "post": {
+        "summary": "Set User Admin Status",
+        "description": "Set a user's admin status (super admin only)",
+        "operationId": "set_user_admin_status_admin_user_set_admin_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserAdminUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/account": {
+      "get": {
+        "summary": "Account Page",
+        "operationId": "account_page_account_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/account/api-keys/create": {
+      "post": {
+        "summary": "Create Api Key Endpoint",
+        "operationId": "create_api_key_endpoint_account_api_keys_create_post",
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_create_api_key_endpoint_account_api_keys_create_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/account/api-keys/delete/{key_id}": {
+      "delete": {
+        "summary": "Delete Api Key Endpoint",
+        "operationId": "delete_api_key_endpoint_account_api_keys_delete__key_id__delete",
+        "parameters": [
+          {
+            "name": "key_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Key Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/compare/{comparison_id}": {
+      "get": {
+        "summary": "View Comparison",
+        "description": "View a comparison by its ID.\n\nRetrieves the comparison data, updates the last accessed timestamp,\nand renders the comparison template with all necessary data.",
+        "operationId": "view_comparison_compare__comparison_id__get",
+        "parameters": [
+          {
+            "name": "comparison_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Comparison Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/": {
+      "get": {
+        "summary": "Home",
+        "description": "Render the home page with upload form.",
+        "operationId": "home__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Body_api_create_comparison_api_v1_comparison_post": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "show_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Show Name"
+          },
+          "expiration_type": {
+            "type": "string",
+            "title": "Expiration Type",
+            "default": "from_last_access"
+          },
+          "expiration_enabled": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expiration Enabled"
+          },
+          "expiration_days": {
+            "type": "integer",
+            "title": "Expiration Days",
+            "default": 7
+          },
+          "tags": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tags"
+          },
+          "total_rows": {
+            "type": "integer",
+            "title": "Total Rows",
+            "default": 1
+          },
+          "total_columns": {
+            "type": "integer",
+            "title": "Total Columns",
+            "default": 2
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "Body_api_create_comparison_api_v1_comparison_post"
+      },
+      "Body_api_login_api_v1_login_post": {
+        "properties": {
+          "grant_type": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^password$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Grant Type"
+          },
+          "username": {
+            "type": "string",
+            "title": "Username"
+          },
+          "password": {
+            "type": "string",
+            "format": "password",
+            "title": "Password"
+          },
+          "scope": {
+            "type": "string",
+            "title": "Scope",
+            "default": ""
+          },
+          "client_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Client Id"
+          },
+          "client_secret": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "format": "password",
+            "title": "Client Secret"
+          }
+        },
+        "type": "object",
+        "required": [
+          "username",
+          "password"
+        ],
+        "title": "Body_api_login_api_v1_login_post"
+      },
+      "Body_api_upload_image_api_v1_comparison__comparison_id__image_post": {
+        "properties": {
+          "file": {
+            "type": "string",
+            "format": "binary",
+            "title": "File"
+          },
+          "row": {
+            "type": "integer",
+            "title": "Row"
+          },
+          "column": {
+            "type": "integer",
+            "title": "Column"
+          },
+          "original_filename": {
+            "type": "string",
+            "title": "Original Filename"
+          },
+          "custom_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Custom Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file",
+          "row",
+          "column",
+          "original_filename"
+        ],
+        "title": "Body_api_upload_image_api_v1_comparison__comparison_id__image_post"
+      },
+      "Body_create_api_key_endpoint_account_api_keys_create_post": {
+        "properties": {
+          "key_name": {
+            "type": "string",
+            "title": "Key Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "key_name"
+        ],
+        "title": "Body_create_api_key_endpoint_account_api_keys_create_post"
+      },
+      "ComparisonCreate": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name",
+            "description": "Internal name for the comparison",
+            "examples": [
+              "Example Comparison"
+            ]
+          },
+          "show_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Show Name",
+            "description": "Display name shown in the UI",
+            "examples": [
+              "Example"
+            ]
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Tags",
+            "description": "List of tags for categorizing the comparison",
+            "examples": [
+              [
+                "example",
+                "test",
+                "api"
+              ]
+            ]
+          },
+          "total_rows": {
+            "type": "integer",
+            "title": "Total Rows",
+            "description": "Number of rows in the comparison grid (max 20)",
+            "default": 1,
+            "examples": [
+              1
+            ]
+          },
+          "total_columns": {
+            "type": "integer",
+            "title": "Total Columns",
+            "description": "Number of columns in the comparison grid",
+            "default": 2,
+            "examples": [
+              2
+            ]
+          },
+          "expiration_type": {
+            "type": "string",
+            "title": "Expiration Type",
+            "description": "When to expire the comparison: 'from_creation' or 'from_last_access'",
+            "default": "from_last_access",
+            "examples": [
+              "from_last_access"
+            ]
+          },
+          "expiration_days": {
+            "type": "integer",
+            "title": "Expiration Days",
+            "description": "Number of days until the comparison expires",
+            "default": 7,
+            "examples": [
+              7
+            ]
+          }
+        },
+        "type": "object",
+        "title": "ComparisonCreate"
+      },
+      "ComparisonDetail": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name",
+            "description": "Internal name for the comparison",
+            "examples": [
+              "Example Comparison"
+            ]
+          },
+          "show_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Show Name",
+            "description": "Display name shown in the UI",
+            "examples": [
+              "Example"
+            ]
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Tags",
+            "description": "List of tags for categorizing the comparison",
+            "examples": [
+              [
+                "example",
+                "test",
+                "api"
+              ]
+            ]
+          },
+          "total_rows": {
+            "type": "integer",
+            "title": "Total Rows",
+            "description": "Number of rows in the comparison grid (max 20)",
+            "default": 1,
+            "examples": [
+              1
+            ]
+          },
+          "total_columns": {
+            "type": "integer",
+            "title": "Total Columns",
+            "description": "Number of columns in the comparison grid",
+            "default": 2,
+            "examples": [
+              2
+            ]
+          },
+          "expiration_type": {
+            "type": "string",
+            "title": "Expiration Type",
+            "description": "When to expire the comparison: 'from_creation' or 'from_last_access'",
+            "default": "from_last_access",
+            "examples": [
+              "from_last_access"
+            ]
+          },
+          "expiration_days": {
+            "type": "integer",
+            "title": "Expiration Days",
+            "description": "Number of days until the comparison expires",
+            "default": 7,
+            "examples": [
+              7
+            ]
+          },
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "Unique identifier for the comparison",
+            "examples": [
+              "11256486-6607-4ba9-88f1-ac7cb0105e17"
+            ]
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At",
+            "description": "Timestamp when the comparison was created",
+            "examples": [
+              "2023-05-01 12:34:56"
+            ]
+          },
+          "last_accessed": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Accessed",
+            "description": "Timestamp when the comparison was last accessed",
+            "examples": [
+              "2023-05-02 10:11:12"
+            ]
+          },
+          "images": {
+            "items": {
+              "$ref": "#/components/schemas/ImageDetail"
+            },
+            "type": "array",
+            "title": "Images"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "title": "ComparisonDetail"
+      },
+      "ComparisonResponse": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name",
+            "description": "Internal name for the comparison",
+            "examples": [
+              "Example Comparison"
+            ]
+          },
+          "show_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Show Name",
+            "description": "Display name shown in the UI",
+            "examples": [
+              "Example"
+            ]
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Tags",
+            "description": "List of tags for categorizing the comparison",
+            "examples": [
+              [
+                "example",
+                "test",
+                "api"
+              ]
+            ]
+          },
+          "total_rows": {
+            "type": "integer",
+            "title": "Total Rows",
+            "description": "Number of rows in the comparison grid (max 20)",
+            "default": 1,
+            "examples": [
+              1
+            ]
+          },
+          "total_columns": {
+            "type": "integer",
+            "title": "Total Columns",
+            "description": "Number of columns in the comparison grid",
+            "default": 2,
+            "examples": [
+              2
+            ]
+          },
+          "expiration_type": {
+            "type": "string",
+            "title": "Expiration Type",
+            "description": "When to expire the comparison: 'from_creation' or 'from_last_access'",
+            "default": "from_last_access",
+            "examples": [
+              "from_last_access"
+            ]
+          },
+          "expiration_days": {
+            "type": "integer",
+            "title": "Expiration Days",
+            "description": "Number of days until the comparison expires",
+            "default": 7,
+            "examples": [
+              7
+            ]
+          },
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "Unique identifier for the comparison",
+            "examples": [
+              "11256486-6607-4ba9-88f1-ac7cb0105e17"
+            ]
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At",
+            "description": "Timestamp when the comparison was created",
+            "examples": [
+              "2023-05-01 12:34:56"
+            ]
+          },
+          "last_accessed": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Accessed",
+            "description": "Timestamp when the comparison was last accessed",
+            "examples": [
+              "2023-05-02 10:11:12"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "title": "ComparisonResponse"
+      },
+      "CustomNameUpdate": {
+        "properties": {
+          "custom_name": {
+            "type": "string",
+            "title": "Custom Name",
+            "description": "New custom name for the image",
+            "examples": [
+              "Updated Image Name"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "custom_name"
+        ],
+        "title": "CustomNameUpdate"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "ImageDetail": {
+        "properties": {
+          "filename": {
+            "type": "string",
+            "title": "Filename",
+            "description": "System filename of the image",
+            "examples": [
+              "55c501a7-86a7-44b7-9aaa-333c96d38f11.jpg"
+            ]
+          },
+          "original_filename": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Original Filename",
+            "description": "Original filename of the image",
+            "examples": [
+              "image1.jpg"
+            ]
+          },
+          "custom_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Custom Name",
+            "description": "Custom name for the image",
+            "examples": [
+              "Left Image"
+            ]
+          },
+          "image_size": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image Size",
+            "description": "Size of the image",
+            "examples": [
+              "1024 bytes"
+            ]
+          },
+          "row": {
+            "type": "integer",
+            "title": "Row",
+            "description": "Row position in the comparison grid",
+            "examples": [
+              0
+            ]
+          },
+          "column": {
+            "type": "integer",
+            "title": "Column",
+            "description": "Column position in the comparison grid",
+            "examples": [
+              0
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "filename",
+          "row",
+          "column"
+        ],
+        "title": "ImageDetail"
+      },
+      "UserAdminUpdate": {
+        "properties": {
+          "user_id": {
+            "type": "integer",
+            "title": "User Id"
+          },
+          "is_admin": {
+            "type": "boolean",
+            "title": "Is Admin"
+          }
+        },
+        "type": "object",
+        "required": [
+          "user_id",
+          "is_admin"
+        ],
+        "title": "UserAdminUpdate",
+        "description": "Pydantic model for updating a user's admin status."
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}
